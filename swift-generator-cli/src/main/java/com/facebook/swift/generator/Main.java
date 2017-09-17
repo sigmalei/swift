@@ -26,35 +26,31 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.net.URI;
 
-public class Main
-{
-
-    public static final Function<File,URI> FILE_TO_URI_TRANSFORM = new Function<File, URI>()
-    {
+public class Main {
+    
+    public static final Function<File, URI> FILE_TO_URI_TRANSFORM = new Function<File, URI>() {
         @Nonnull
         @Override
-        public URI apply(@Nonnull File input)
-        {
+        public URI apply(@Nonnull File input) {
             return input.toURI();
         }
     };
-
-    public static void main(final String ... args) throws Exception
-    {
+    
+    public static void main(final String... args) throws Exception {
         URI workingDirectory = new File(System.getProperty("user.dir")).getCanonicalFile().toURI();
-
+        
         SwiftGeneratorCommandLineConfig cliConfig = new SwiftGeneratorCommandLineConfig();
         JCommander jCommander = new JCommander(cliConfig, args);
         jCommander.setProgramName(SwiftGenerator.class.getSimpleName());
-
+        
         if (cliConfig.inputFiles == null) {
             jCommander.usage();
             return;
         }
-
+        
         Iterable<URI> includeSearchPaths =
                 Iterables.transform(cliConfig.includePaths, FILE_TO_URI_TRANSFORM);
-
+        
         SwiftGeneratorConfig.Builder configBuilder = SwiftGeneratorConfig.builder()
                 .inputBase(workingDirectory)
                 .includeSearchPaths(includeSearchPaths)
@@ -64,21 +60,21 @@ public class Main
                 .generateIncludedCode(cliConfig.generateIncludedCode)
                 .codeFlavor(cliConfig.generateBeans ? "java-regular" : "java-immutable")
                 .port(cliConfig.port);
-
+        
         for (SwiftGeneratorTweak tweak : cliConfig.tweaks) {
             configBuilder.addTweak(tweak);
         }
-
+        
         if (cliConfig.usePlainJavaNamespace) {
             configBuilder.addTweak(SwiftGeneratorTweak.USE_PLAIN_JAVA_NAMESPACE);
         }
-
+        
         if (cliConfig.fallbackToPlainJavaNamespace) {
-          configBuilder.addTweak(SwiftGeneratorTweak.FALLBACK_TO_PLAIN_JAVA_NAMESPACE);
+            configBuilder.addTweak(SwiftGeneratorTweak.FALLBACK_TO_PLAIN_JAVA_NAMESPACE);
         }
-
-      Iterable<URI> inputs = Iterables.transform(cliConfig.inputFiles, FILE_TO_URI_TRANSFORM);
-
+        
+        Iterable<URI> inputs = Iterables.transform(cliConfig.inputFiles, FILE_TO_URI_TRANSFORM);
+        
         new SwiftGenerator(configBuilder.build()).parse(inputs);
     }
 }

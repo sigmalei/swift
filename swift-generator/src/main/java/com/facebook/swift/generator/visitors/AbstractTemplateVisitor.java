@@ -19,12 +19,15 @@ import com.facebook.swift.generator.SwiftDocumentContext;
 import com.facebook.swift.generator.SwiftGeneratorConfig;
 import com.facebook.swift.generator.SwiftGeneratorTweak;
 import com.facebook.swift.generator.template.JavaContext;
+import com.facebook.swift.generator.template.ServerIMplContext;
 import com.facebook.swift.generator.template.TemplateContextGenerator;
 import com.facebook.swift.generator.util.TemplateLoader;
 import com.facebook.swift.parser.visitor.DocumentVisitor;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.stringtemplate.v4.AutoIndentWriter;
 import org.stringtemplate.v4.ST;
 
@@ -32,7 +35,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -73,16 +78,34 @@ public abstract class AbstractTemplateVisitor implements DocumentVisitor {
             folder = new File(folder, pkg);
             folder.mkdir();
         }
-        final File file = context.getJavaPackage().contains("impl") ?
-                new File(folder, context.getJavaName() + "Impl" + ".java"):
-                new File(folder, context.getJavaName() + ".java");
+
+        final File file;
         
+        final File serverCreatorFile =  new File(folder, "ServerCreator.java");
+    
+        final List<ServerIMplContext> serviceImplList = Lists.newLinkedList();
         
-//        if (context.getJavaPackage().contains("impl")) {
-//            file = new File(folder, context.getJavaName() + "Impl" + ".java");
-//        } else {
-//            file = new File(folder, context.getJavaName() + ".java");
-//        }
+        if (context.getJavaPackage().contains("impl")) {
+            file = new File(folder, context.getJavaName() + "Impl" + ".java");
+            
+            serviceImplList.add(new ServerIMplContext(context.getJavaName() + "Impl"));
+        } else {
+            file = new File(folder, context.getJavaName() + ".java");
+        }
+    
+        final ST serverTemplate = templateLoader.load("server");
+        
+        Map<String, Object> map = Maps.newConcurrentMap();
+        map.put("serviceImplList", serviceImplList);
+        map.put("javaPackage", "com.sigma");
+        
+        serverTemplate.add("context", serviceImplList);
+    
+        try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(serverCreatorFile), Charsets.UTF_8)) {
+            serverTemplate.write(new AutoIndentWriter(osw));
+            osw.flush();
+        }
+        
         
         
         try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
