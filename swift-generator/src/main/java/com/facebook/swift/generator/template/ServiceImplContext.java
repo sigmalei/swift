@@ -15,41 +15,29 @@
  */
 package com.facebook.swift.generator.template;
 
-import com.google.common.collect.Lists;
-
 import com.facebook.swift.generator.SwiftDocumentContext;
+import com.google.common.collect.Lists;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 
-public class ServiceContext extends BaseJavaContext
+public class ServiceImplContext extends BaseJavaContext
 {
     private final String name;
     private final String javaPackage;
     private final String javaName;
-    private final Set<String> javaParents;
-    private final Set<String> javaAsyncParents;
+
 
     private final List<MethodContext> methods = Lists.newArrayList();
 
-    ServiceContext(SwiftDocumentContext swiftDocumentContext, String name, String javaPackage, String javaName, Set<String> javaParents)
+    ServiceImplContext(SwiftDocumentContext swiftDocumentContext, String name, String javaPackage, String javaName, Set<String> javaParents)
     {
         super(swiftDocumentContext);
         this.name = name;
         this.javaPackage = javaPackage;
         this.javaName = javaName;
-        this.javaParents = javaParents;
-        Set<String> asyncParents = new HashSet<>();
-        for (String parent: javaParents) {
-            if(parent.equals("Closeable")) {
-                asyncParents.add(parent);
-            } else {
-                asyncParents.add(parent + ".Async");
-            }
-        }
-        this.javaAsyncParents = asyncParents;
     }
 
     public void addMethod(final MethodContext method)
@@ -70,7 +58,7 @@ public class ServiceContext extends BaseJavaContext
     @Override
     public String getJavaPackage()
     {
-        return javaPackage;
+        return javaPackage + ".impl";
     }
 
     @Override
@@ -79,21 +67,13 @@ public class ServiceContext extends BaseJavaContext
         return javaName;
     }
 
-    public Set<String> getJavaParents()
-    {
-        return javaParents;
-    }
-
-    public Set<String> getJavaAsyncParents() { return javaAsyncParents; }
-
     @Override
     public int hashCode()
     {
-        final int prime = 31;
+        final int prime = 399;
         int result = 1;
         result = prime * result + ((javaName == null) ? 0 : javaName.hashCode());
         result = prime * result + ((javaPackage == null) ? 0 : javaPackage.hashCode());
-        result = prime * result + ((javaParents == null) ? 0 : javaParents.hashCode());
         result = prime * result + ((methods == null) ? 0 : methods.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
@@ -111,7 +91,7 @@ public class ServiceContext extends BaseJavaContext
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ServiceContext other = (ServiceContext) obj;
+        ServiceImplContext other = (ServiceImplContext) obj;
         if (javaName == null) {
             if (other.javaName != null) {
                 return false;
@@ -128,14 +108,7 @@ public class ServiceContext extends BaseJavaContext
         else if (!javaPackage.equals(other.javaPackage)) {
             return false;
         }
-        if (javaParents == null) {
-            if (other.javaParents != null) {
-                return false;
-            }
-        }
-        else if (!javaParents.equals(other.javaParents)) {
-            return false;
-        }
+        
         if (methods == null) {
             if (other.methods != null) {
                 return false;
@@ -158,6 +131,6 @@ public class ServiceContext extends BaseJavaContext
     @Override
     public String toString()
     {
-        return "ServiceContext [name=" + name + ", javaPackage=" + javaPackage + ", javaName=" + javaName + ", javaParents=" + javaParents + ", methods=" + methods + "]";
+        return "ServiceImplContext [name=" + name + ", javaPackage=" + javaPackage + ", javaName=" + javaName + ", methods=" + methods + "]";
     }
 }

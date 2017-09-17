@@ -91,6 +91,24 @@ public class TemplateContextGenerator
 
         return serviceContext;
     }
+    
+    public ServiceImplContext serviceImplFromThrift(final Service service)
+    {
+        final String name = mangleJavaTypeName(service.getName());
+        final SwiftJavaType javaType = typeRegistry.findType(defaultNamespace, service.getName());
+        
+        final ServiceImplContext serviceImplContext = new ServiceImplContext(swiftDocumentContext,
+                name,
+                javaType.getPackage(),
+                javaType.getSimpleName(),
+                null);
+        
+//        if (addCloseableInterface) {
+//            serviceImplContext.addMethod(CLOSE_METHOD_CONTEXT);
+//        }
+        
+        return serviceImplContext;
+    }
 
     public StructContext structFromThrift(final AbstractStruct struct)
     {

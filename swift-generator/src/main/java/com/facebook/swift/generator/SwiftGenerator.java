@@ -16,14 +16,7 @@
 package com.facebook.swift.generator;
 
 import com.facebook.swift.generator.util.TemplateLoader;
-import com.facebook.swift.generator.visitors.ConstantsVisitor;
-import com.facebook.swift.generator.visitors.ExceptionVisitor;
-import com.facebook.swift.generator.visitors.IntegerEnumVisitor;
-import com.facebook.swift.generator.visitors.ServiceVisitor;
-import com.facebook.swift.generator.visitors.StringEnumVisitor;
-import com.facebook.swift.generator.visitors.StructVisitor;
-import com.facebook.swift.generator.visitors.TypeVisitor;
-import com.facebook.swift.generator.visitors.UnionVisitor;
+import com.facebook.swift.generator.visitors.*;
 import com.facebook.swift.parser.model.Document;
 import com.facebook.swift.parser.model.Header;
 import com.facebook.swift.parser.visitor.DocumentVisitor;
@@ -231,6 +224,7 @@ public class SwiftGenerator
 
         final List<DocumentVisitor> visitors = Lists.newArrayList();
         visitors.add(new ServiceVisitor(templateLoader, context, swiftGeneratorConfig, outputFolder));
+        visitors.add(new ServiceImplVisitor(templateLoader, context, swiftGeneratorConfig, outputFolder));
         visitors.add(new StructVisitor(templateLoader, context, swiftGeneratorConfig, outputFolder));
         visitors.add(new UnionVisitor(templateLoader, context, swiftGeneratorConfig, outputFolder));
         visitors.add(new ExceptionVisitor(templateLoader, context, swiftGeneratorConfig, outputFolder));

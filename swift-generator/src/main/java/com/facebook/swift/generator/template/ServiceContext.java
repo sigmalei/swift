@@ -70,12 +70,14 @@ public class ServiceContext extends BaseJavaContext
     @Override
     public String getJavaPackage()
     {
+        System.err.println("service javaPackage is " + javaPackage);
         return javaPackage;
     }
 
     @Override
     public String getJavaName()
     {
+        
         return javaName;
     }
 

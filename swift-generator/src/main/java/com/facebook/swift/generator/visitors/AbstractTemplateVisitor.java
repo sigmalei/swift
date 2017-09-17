@@ -37,57 +37,58 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
-public abstract class AbstractTemplateVisitor implements DocumentVisitor
-{
+public abstract class AbstractTemplateVisitor implements DocumentVisitor {
     private final File outputFolder;
     private final TemplateLoader templateLoader;
     protected final TemplateContextGenerator contextGenerator;
     protected final SwiftGeneratorConfig config;
-
+    
     protected AbstractTemplateVisitor(final TemplateLoader templateLoader,
                                       final SwiftDocumentContext context,
                                       final SwiftGeneratorConfig config,
-                                      final File outputFolder)
-    {
+                                      final File outputFolder) {
         this.outputFolder = outputFolder;
         this.templateLoader = templateLoader;
         this.contextGenerator = context.getTemplateContextGenerator();
         this.config = config;
     }
-
+    
     protected void render(final JavaContext context, final String templateName)
-        throws IOException
-    {
+            throws IOException {
         final ST template = templateLoader.load(templateName);
         checkState(template != null, "No template for '%s' found!", templateName);
         template.add("context", context);
-
+        
         final Map<String, Boolean> tweakMap = new HashMap<>();
-        for (SwiftGeneratorTweak tweak: SwiftGeneratorTweak.values()) {
+        for (SwiftGeneratorTweak tweak : SwiftGeneratorTweak.values()) {
             tweakMap.put(tweak.name(), config.containsTweak(tweak));
         }
         template.add("tweaks", tweakMap);
-
-
+        
+        
         final Iterable<String> packages = Splitter.on('.').split(context.getJavaPackage());
         File folder = outputFolder;
-
+        
         for (String pkg : packages) {
             folder = new File(folder, pkg);
             folder.mkdir();
         }
-
-        final File file = new File(folder, context.getJavaName() + ".java");
-
+        final File file;
+        if (context.getJavaPackage().contains("impl")) {
+            file = new File(folder, context.getJavaName() + "Impl" + ".java");
+        } else {
+            file = new File(folder, context.getJavaName() + ".java");
+        }
+        
+        
         try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
             template.write(new AutoIndentWriter(osw));
             osw.flush();
         }
     }
-
+    
     @Override
-    public void finish() throws IOException
-    {
+    public void finish() throws IOException {
     }
 }
 
