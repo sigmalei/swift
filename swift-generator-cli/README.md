@@ -36,6 +36,9 @@ After downloading the tool, you should be able to run it like this:
         -use_java_namespace
            Use 'java' namespace instead of 'java.swift' namespace
            Default: false
+        -server_port
+           thrift server listen port
+           Default: 9880
 
 ## Usage
 
