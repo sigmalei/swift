@@ -16,10 +16,12 @@
 package com.facebook.swift.generator.visitors;
 
 import com.facebook.swift.generator.SwiftDocumentContext;
+import com.facebook.swift.generator.SwiftGenerator;
 import com.facebook.swift.generator.SwiftGeneratorConfig;
 import com.facebook.swift.generator.SwiftGeneratorTweak;
 import com.facebook.swift.generator.template.JavaContext;
-import com.facebook.swift.generator.template.ServerIMplContext;
+import com.facebook.swift.generator.template.ServerImplContext;
+import com.facebook.swift.generator.template.ServiceImplContext;
 import com.facebook.swift.generator.template.TemplateContextGenerator;
 import com.facebook.swift.generator.util.TemplateLoader;
 import com.facebook.swift.parser.visitor.DocumentVisitor;
@@ -35,7 +37,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,30 +82,18 @@ public abstract class AbstractTemplateVisitor implements DocumentVisitor {
 
         final File file;
         
-        final File serverCreatorFile =  new File(folder, "ServerCreator.java");
-    
-        final List<ServerIMplContext> serviceImplList = Lists.newLinkedList();
-        
         if (context.getJavaPackage().contains("impl")) {
             file = new File(folder, context.getJavaName() + "Impl" + ".java");
-            
-            serviceImplList.add(new ServerIMplContext(context.getJavaName() + "Impl"));
+            ((List<ServerImplContext>)SwiftGenerator.globalContext.get("classList"))
+                    .add(new ServerImplContext(context.getJavaName() + "Impl"));
         } else {
             file = new File(folder, context.getJavaName() + ".java");
         }
     
-        final ST serverTemplate = templateLoader.load("server");
         
-        Map<String, Object> map = Maps.newConcurrentMap();
-        map.put("serviceImplList", serviceImplList);
-        map.put("javaPackage", "com.sigma");
         
-        serverTemplate.add("context", serviceImplList);
-    
-        try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(serverCreatorFile), Charsets.UTF_8)) {
-            serverTemplate.write(new AutoIndentWriter(osw));
-            osw.flush();
-        }
+        SwiftGenerator.globalContext.put("package", context.getJavaPackage());
+        
         
         
         

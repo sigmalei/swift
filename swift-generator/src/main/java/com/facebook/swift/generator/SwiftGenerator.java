@@ -15,11 +15,14 @@
  */
 package com.facebook.swift.generator;
 
+import com.facebook.swift.generator.template.ServerImplContext;
+import com.facebook.swift.generator.template.ServiceImplContext;
 import com.facebook.swift.generator.util.TemplateLoader;
 import com.facebook.swift.generator.visitors.*;
 import com.facebook.swift.parser.model.Document;
 import com.facebook.swift.parser.model.Header;
 import com.facebook.swift.parser.visitor.DocumentVisitor;
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -30,19 +33,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.airlift.log.Logger;
+import org.stringtemplate.v4.AutoIndentWriter;
+import org.stringtemplate.v4.ST;
 
 import javax.annotation.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import static com.facebook.swift.generator.util.SwiftInternalStringUtils.isBlank;
 
@@ -52,6 +51,14 @@ import static com.facebook.swift.generator.util.SwiftInternalStringUtils.isBlank
 public class SwiftGenerator
 {
     private static final Logger LOG = Logger.get(SwiftGenerator.class);
+    
+    public static final Map<String, Object> globalContext = Maps.newConcurrentMap();
+    
+    
+    static {
+        globalContext.put("classList", Lists.newArrayList());
+        
+    }
 
     private static final Map<String, ImmutableList<String>> TEMPLATES =
             ImmutableMap.of(
@@ -104,7 +111,64 @@ public class SwiftGenerator
 
         for (final SwiftDocumentContext context : contexts.values()) {
             generateFiles(context);
+            
         }
+        //outputFolder
+        
+        
+    
+        //File folder = outputFolder;
+//        folder = new File(folder,  globalContext.get("package") + ".server");
+//
+//        final File serverCreatorFile =  new File(folder, "ServerCreator.java");
+//
+//        (String) globalContext.get("package")
+    
+    
+        final Iterable<String> packages = Splitter.on('.').split((String) globalContext.get("package"));
+        File folder = outputFolder;
+        
+        
+        List<String> packagesPath = Lists.newLinkedList();
+        for (String pkg : packages){
+            packagesPath.add(pkg);
+        }
+        StringBuilder sb = new StringBuilder();
+        
+        for (int i = 0; i < packagesPath.size() - 2; i++) {
+            folder = new File(folder, packagesPath.get(i));
+            folder.mkdir();
+            sb.append(packagesPath.get(i)).append(".");
+        }
+        
+        folder = new File(folder, "server");
+        folder.mkdir();
+    
+        final File serverCreatorFile =  new File(folder, "ServerCreator.java");
+        
+    
+//        for (String pkg : packages) {
+//            folder = new File(folder, pkg);
+//            folder.mkdir();
+//        }
+    
+        final ST serverTemplate = templateLoader.load("server");
+    
+        Map<String, Object> map = Maps.newConcurrentMap();
+        
+        List<ServerImplContext> serviceImplList = ((List<ServerImplContext>)SwiftGenerator.globalContext.get("classList"));
+        
+        map.put("serviceImplList", serviceImplList);
+        map.put("javaPackage", sb.toString() + "server");
+        map.put("implPackage", globalContext.get("package"));
+    
+        serverTemplate.add("context", map);
+    
+        try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(serverCreatorFile), Charsets.UTF_8)) {
+            serverTemplate.write(new AutoIndentWriter(osw));
+            osw.flush();
+        }
+        
         
         
 

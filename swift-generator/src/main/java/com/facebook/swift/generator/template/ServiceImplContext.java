@@ -28,6 +28,7 @@ public class ServiceImplContext extends BaseJavaContext
     private final String name;
     private final String javaPackage;
     private final String javaName;
+    private final String interfacePackage;
 
 
     private final List<MethodContext> methods = Lists.newArrayList();
@@ -38,6 +39,7 @@ public class ServiceImplContext extends BaseJavaContext
         this.name = name;
         this.javaPackage = javaPackage;
         this.javaName = javaName;
+        this.interfacePackage = this.javaPackage.replace(".impl", "");
     }
 
     public void addMethod(final MethodContext method)
@@ -66,7 +68,11 @@ public class ServiceImplContext extends BaseJavaContext
     {
         return javaName;
     }
-
+    
+    public String getInterfacePackage() {
+        return interfacePackage;
+    }
+    
     @Override
     public int hashCode()
     {

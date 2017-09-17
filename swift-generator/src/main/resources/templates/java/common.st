@@ -45,6 +45,7 @@ package <context.javaPackage>;
 import com.facebook.swift.codec.*;
 import com.facebook.swift.codec.ThriftField.Requiredness;
 import com.facebook.swift.service.*;
+import <context.interfacePackage>.*;
 import java.io.*;
 import java.util.*;
 
@@ -248,7 +249,7 @@ _methodImpl(method) ::= <<
 <if(method.name)>
 @Override
 <endif>
-<method.javaType> <method.javaName><_paramsImpl(method.parameters)><if(!method.exceptions)>
+public <method.javaType> <method.javaName><_paramsImpl(method.parameters)><if(!method.exceptions)>
 <else> throws <method.exceptions: {exception |<exception.type>}; separator=", "><endif>{
     //this is mock logic, the '\' is escape characters
     return new Gson().fromJson("this is json string from db", new TypeToken\<<method.javaType>\>(){}.getType());
