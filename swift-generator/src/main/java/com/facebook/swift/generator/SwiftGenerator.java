@@ -108,10 +108,10 @@ public class SwiftGenerator
         }
 
         LOG.info("IDL parsing complete, writing java code...");
-
+        int port = 9880;
         for (final SwiftDocumentContext context : contexts.values()) {
             generateFiles(context);
-            
+            port = context.getSwiftGeneratorConfig().getPort();
         }
         //outputFolder
         
@@ -145,6 +145,7 @@ public class SwiftGenerator
         folder.mkdir();
     
         final File serverCreatorFile =  new File(folder, "ServerCreator.java");
+        final File serverRunFile =  new File(folder, "ServerRunMain.java");
         
     
 //        for (String pkg : packages) {
@@ -161,6 +162,7 @@ public class SwiftGenerator
         map.put("serviceImplList", serviceImplList);
         map.put("javaPackage", sb.toString() + "server");
         map.put("implPackage", globalContext.get("package"));
+        map.put("serverPort", port);
     
         serverTemplate.add("context", map);
     
@@ -169,6 +171,16 @@ public class SwiftGenerator
             osw.flush();
         }
         
+        //serverRun
+        final ST serverRunTemplate = templateLoader.load("serverRun");
+        Map<String, Object> serverRunMap = Maps.newConcurrentMap();
+        serverRunMap.put("serverPackage", sb.toString() + "server");
+        serverRunTemplate.add("context", serverRunMap);
+    
+        try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(serverRunFile), Charsets.UTF_8)) {
+            serverRunTemplate.write(new AutoIndentWriter(osw));
+            osw.flush();
+        }
         
         
 

@@ -48,7 +48,7 @@ public class ServerCreator {
         taskWorkerExecutor = Executors.newFixedThreadPool(1);
 
         ThriftServerDef serverDef = ThriftServerDef.newBuilder()
-                .listen(12345)
+                .listen(<context.serverPort>)
                 .withProcessor(processor)
                 .protocol(new TBinaryProtocol.Factory())
                 .using(taskWorkerExecutor)
@@ -89,4 +89,32 @@ generatedComment(context) ::= <<
 
 _serverImplDef(serverImpl) ::= <<
 new <serverImpl.name>()
+>>
+
+
+serverRun(context) ::= <<
+package <context.serverPackage>;
+
+import com.facebook.swift.service.ThriftServer;
+
+/**
+ * Created with IntelliJ IDEA.
+ * author: Sigma Miao
+ * generate by swift generator-ng
+ */
+public class ServerDemo {
+
+    public static void main(String[] args) {
+        ServerCreator serverCreator = new ServerCreator().invoke();
+
+        ThriftServer server = serverCreator.getServer();
+
+        server.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(
+                serverCreator::stop));
+
+        System.out.println("service running...");
+    }
+}
 >>
