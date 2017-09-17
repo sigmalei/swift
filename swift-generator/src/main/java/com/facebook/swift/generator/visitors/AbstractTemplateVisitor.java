@@ -73,12 +73,16 @@ public abstract class AbstractTemplateVisitor implements DocumentVisitor {
             folder = new File(folder, pkg);
             folder.mkdir();
         }
-        final File file;
-        if (context.getJavaPackage().contains("impl")) {
-            file = new File(folder, context.getJavaName() + "Impl" + ".java");
-        } else {
-            file = new File(folder, context.getJavaName() + ".java");
-        }
+        final File file = context.getJavaPackage().contains("impl") ?
+                new File(folder, context.getJavaName() + "Impl" + ".java"):
+                new File(folder, context.getJavaName() + ".java");
+        
+        
+//        if (context.getJavaPackage().contains("impl")) {
+//            file = new File(folder, context.getJavaName() + "Impl" + ".java");
+//        } else {
+//            file = new File(folder, context.getJavaName() + ".java");
+//        }
         
         
         try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {

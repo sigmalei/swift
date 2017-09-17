@@ -80,4 +80,10 @@ public class SwiftGeneratorCommandLineConfig
       description = "Use 'java' namespace if 'java.swift' namespace is not present"
   )
   public boolean fallbackToPlainJavaNamespace = false;
+    
+    @Parameter(
+            names = "-server_port",
+            description = "thrift server port default is '9880'"
+    )
+    public int port = 9880;
 }

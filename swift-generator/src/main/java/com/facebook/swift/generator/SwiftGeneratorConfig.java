@@ -23,8 +23,7 @@ import java.net.URI;
 import java.util.EnumSet;
 import java.util.Set;
 
-public class SwiftGeneratorConfig
-{
+public class SwiftGeneratorConfig {
     private final URI inputBase;
     private final Iterable<URI> includeSearchPaths;
     private final File outputFolder;
@@ -33,7 +32,8 @@ public class SwiftGeneratorConfig
     private final Set<SwiftGeneratorTweak> generatorTweaks;
     private final boolean generateIncludedCode;
     private final String codeFlavor;
-
+    private final int port;
+    
     private SwiftGeneratorConfig(
             final URI inputBase,
             Iterable<URI> includeSearchPaths, final File outputFolder,
@@ -41,8 +41,8 @@ public class SwiftGeneratorConfig
             final String defaultPackage,
             final Set<SwiftGeneratorTweak> generatorTweaks,
             final boolean generateIncludedCode,
-            final String codeFlavor)
-    {
+            final String codeFlavor,
+            final int port) {
         this.inputBase = inputBase;
         this.includeSearchPaths = includeSearchPaths;
         this.outputFolder = outputFolder;
@@ -51,80 +51,75 @@ public class SwiftGeneratorConfig
         this.generatorTweaks = generatorTweaks;
         this.generateIncludedCode = generateIncludedCode;
         this.codeFlavor = codeFlavor;
+        this.port = port;
     }
-
-    public static Builder builder()
-    {
+    
+    public static Builder builder() {
         return new Builder();
     }
-
+    
     /**
      * Returns the input base URI to load Thrift IDL files.
      */
-    public URI getInputBase()
-    {
+    public URI getInputBase() {
         return inputBase;
     }
-
+    
     /**
      * Returns the list of URIs used as prefixes to search for include files.
      */
-    public Iterable<URI> getIncludeSearchPaths()
-    {
+    public Iterable<URI> getIncludeSearchPaths() {
         return includeSearchPaths;
     }
-
+    
     /**
      * Returns the output folder which will contain the generated sources.
      */
-    public File getOutputFolder()
-    {
+    public File getOutputFolder() {
         return outputFolder;
     }
-
+    
     /**
      * If non-null, overrides the java namespace definitions in the IDL files.
      */
-    public String getOverridePackage()
-    {
+    public String getOverridePackage() {
         return overridePackage;
     }
-
+    
     /**
      * If no namespace was set in the Thrift IDL file, fall back to this package.
      */
-    public String getDefaultPackage()
-    {
+    public String getDefaultPackage() {
         return defaultPackage;
     }
-
+    
     /**
      * Returns true if the tweak is set, false otherwise.
      */
-    public boolean containsTweak(final SwiftGeneratorTweak tweak)
-    {
+    public boolean containsTweak(final SwiftGeneratorTweak tweak) {
         return generatorTweaks.contains(tweak);
     }
-
+    
     /**
      * If true, generate code for all included Thrift IDLs instead of just referring to
      * them.
      */
-    public boolean isGenerateIncludedCode()
-    {
+    public boolean isGenerateIncludedCode() {
         return generateIncludedCode;
     }
-
+    
     /**
      * The template to use for generating source code.
      */
-    public String getCodeFlavor()
-    {
+    public String getCodeFlavor() {
         return codeFlavor;
     }
-
-    public static class Builder
-    {
+    
+    public int getPort() {
+        return port;
+    }
+    
+    public static class Builder {
         private URI inputBase = null;
         private Iterable<URI> includeSearchPaths = null;
         private File outputFolder = null;
@@ -133,22 +128,21 @@ public class SwiftGeneratorConfig
         private Set<SwiftGeneratorTweak> generatorTweaks = EnumSet.noneOf(SwiftGeneratorTweak.class);
         private boolean generateIncludedCode = false;
         private String codeFlavor = null;
-
-        private Builder()
-        {
+        private int port = 9880;
+        
+        private Builder() {
         }
-
-        public SwiftGeneratorConfig build()
-        {
+        
+        public SwiftGeneratorConfig build() {
             Preconditions.checkState(outputFolder != null, "output folder must be set!");
-
+            
             Preconditions.checkState(inputBase != null, "input base uri must be set to load includes!");
             Preconditions.checkState(codeFlavor != null, "no code flavor selected!");
-
+            
             if (includeSearchPaths == null) {
                 includeSearchPaths = Lists.newArrayList();
             }
-
+            
             return new SwiftGeneratorConfig(
                     inputBase,
                     includeSearchPaths,
@@ -157,54 +151,52 @@ public class SwiftGeneratorConfig
                     defaultPackage,
                     generatorTweaks,
                     generateIncludedCode,
-                    codeFlavor);
+                    codeFlavor,
+                    port);
         }
-
-        public Builder inputBase(final URI inputBase)
-        {
+        
+        public Builder inputBase(final URI inputBase) {
             this.inputBase = inputBase;
             return this;
         }
-
-        public Builder includeSearchPaths(final Iterable<URI> includeSearchPaths)
-        {
+        
+        public Builder includeSearchPaths(final Iterable<URI> includeSearchPaths) {
             this.includeSearchPaths = includeSearchPaths;
             return this;
         }
-
-        public Builder outputFolder(final File outputFolder)
-        {
+        
+        public Builder outputFolder(final File outputFolder) {
             this.outputFolder = outputFolder;
             return this;
         }
-
-        public Builder overridePackage(final String overridePackage)
-        {
+        
+        public Builder overridePackage(final String overridePackage) {
             this.overridePackage = overridePackage;
             return this;
         }
-
-        public Builder defaultPackage(final String defaultPackage)
-        {
+        
+        public Builder defaultPackage(final String defaultPackage) {
             this.defaultPackage = defaultPackage;
             return this;
         }
-
-        public Builder addTweak(final SwiftGeneratorTweak tweak)
-        {
+        
+        public Builder addTweak(final SwiftGeneratorTweak tweak) {
             this.generatorTweaks.add(tweak);
             return this;
         }
-
-        public Builder generateIncludedCode(final boolean generateIncludedCode)
-        {
+        
+        public Builder generateIncludedCode(final boolean generateIncludedCode) {
             this.generateIncludedCode = generateIncludedCode;
             return this;
         }
-
-        public Builder codeFlavor(final String codeFlavor)
-        {
+        
+        public Builder codeFlavor(final String codeFlavor) {
             this.codeFlavor = codeFlavor;
+            return this;
+        }
+        
+        public Builder port(final int port) {
+            this.port = port;
             return this;
         }
     }
